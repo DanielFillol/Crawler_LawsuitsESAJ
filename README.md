@@ -17,5 +17,18 @@ go run main.go
 
 ```
 
+## Instalar - MacOS
+```
+Instalar o Google Chrome
+Instalar o JAVA
+Instalar o Brew
+
+Baixar o selenium server stand alone\
+Permitir o acesso ao arquivo (configurações de segurança)
+
+brew install chrome river
+Permitir o chromedriver no painel de segurança
+```
+
 ## Futuro
 Permitir a pesquisa não apenas pelo número do CNJ, mas sim por qualquer dos dados das partes.
