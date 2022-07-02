@@ -1,10 +1,10 @@
 # Crawler_LawsuitsESAJ
 Project for crawlling lawsuit data avaliable in first and seccond degree of brazilian justice system.
 Data Craw:
-- capa ()
+- capa (reference data of the lawsuit)
 - partes (parties)
 - advogados (lawyer's)
-- movimentos (Steps of the lawsuit)
+- movimentos (steps of the lawsuit)
 
 CSV file is generate with collected data.
  
