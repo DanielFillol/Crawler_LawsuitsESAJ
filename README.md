@@ -1,34 +1,32 @@
 # Crawler_LawsuitsESAJ
-Projeto desenhado para capturar dados processuais de um dado processo no primeiro e segundo grau do sistema ESAJ. São capturados todos os dados de ```capa```, ```partes```, ```advogados``` e ```movimentos```. Ao final do processamento são devolvidos um arquivo csv para cada um dos tipos de dados retornados.
+Project for crawlling lawsuit data avaliable in first and seccond degree of brazilian justice system.
+Data Craw:
+- capa ()
+- partes (parties)
+- advogados (lawyer's)
+- movimentos (Steps of the lawsuit)
 
-NOTA: o crawler funciona para os seguintes TJ:```tjac,tjal,tjam,tjce, tjms e tjsp```.
+CSV file is generate with collected data.
  
-## Dependências
-
-Para o esse crawler somos dependentes do projeto [selenium](https://github.com/tebeka/selenium#readme), sendo necessário a pré-instalação do [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/) e do [selenium-server-standalone](https://selenium-release.storage.googleapis.com/index.html?path=3.5/). Nesse projeto também utilizamos o [htmlquery](https://github.com/antchfx/htmlquery).
+## Dependencies
+- [Selenium](https://github.com/tebeka/selenium#readme)
+- [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/)
+- [Selenium-server-standalone](https://selenium-release.storage.googleapis.com/index.html?path=3.5/)
+- [htmlquery](https://github.com/antchfx/htmlquery)
 
 ## Run
-Inicie o selenium server no terminal e depois basta 
+```brew install chrome driver ``` (not needed if you alredy have chrome driver)
 
-```
-java -jar selenium-server-standalone.jar
+```java -jar selenium-server-standalone.jar```
 
-go run main.go
+```go run main.go```
 
-```
+- To config a new search go in **crawler.go** file, function **DayCrawler** and alter the URL parameter on **driver.Get("")**
 
-## Instalar - MacOS
-```
-Instalar o Google Chrome
-Instalar o JAVA
-Instalar o Brew
+## Notes
+- This crawler works for the following courts: ```tjac,tjal,tjam,tjce, tjms and tjsp```.
+- Sometimes chromedriver need a clearnce in security options on MacOS.
+- Don't forget to previus install Java.
 
-Baixar o selenium server stand alone\
-Permitir o acesso ao arquivo (configurações de segurança)
-
-brew install chrome river
-Permitir o chromedriver no painel de segurança
-```
-
-## Futuro
-Permitir a pesquisa não apenas pelo número do CNJ, mas sim por qualquer dos dados das partes.
+## Future
+Build a search function for every parameter allowed, exemple: name of people mentioned in the lawsuit.
