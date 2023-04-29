@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	Login    = "718.191.691-20"
-	Password = "fwrs1825PC"
+	Login    = ""
+	Password = ""
 )
 
 func main() {
