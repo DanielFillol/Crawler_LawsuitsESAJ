@@ -3,6 +3,7 @@ package CSV
 import (
 	"encoding/csv"
 	"github.com/Darklabel91/Crawler_LawsuitsESAJ/Crawler"
+	"strconv"
 )
 
 const fileNameC = "Covers"
@@ -20,8 +21,6 @@ func WriteCovers(lawsuits []Crawler.EntireLawsuit) error {
 	if err != nil {
 		return err
 	}
-
-	defer cf.Close()
 
 	w := csv.NewWriter(cf)
 
@@ -48,6 +47,8 @@ func generateCoverHeaders() []string {
 		"Controle",
 		"Área",
 		"Valor da Causa",
+		"Possui Autos",
+		"Documento encontrado nos Autos",
 		"2 Grau - Titulo",
 		"2 Grau - Tag",
 		"2 Grau - Classe",
@@ -59,6 +60,8 @@ func generateCoverHeaders() []string {
 		"2 Grau - Controle",
 		"2 Grau - Área",
 		"2 Grau - Valor da Causa",
+		"2 Grau - Possui Autos",
+		"2 Grau - Documento encontrado nos Autos",
 	}
 }
 
@@ -77,6 +80,8 @@ func tableCoverRows(results Crawler.EntireLawsuit) []string {
 		results.FirstDegree.Cover.Control,
 		results.FirstDegree.Cover.Field,
 		results.FirstDegree.Cover.Value,
+		strconv.FormatBool(results.FirstDegree.Documents.HasDocuments),
+		strconv.FormatBool(results.FirstDegree.Documents.DocumentFound),
 		results.SecondDegree.Cover.Title,
 		results.SecondDegree.Cover.Tag,
 		results.SecondDegree.Cover.Class,
@@ -88,5 +93,7 @@ func tableCoverRows(results Crawler.EntireLawsuit) []string {
 		results.SecondDegree.Cover.Control,
 		results.SecondDegree.Cover.Field,
 		results.SecondDegree.Cover.Value,
+		strconv.FormatBool(results.SecondDegree.Documents.HasDocuments),
+		strconv.FormatBool(results.SecondDegree.Documents.DocumentFound),
 	}
 }

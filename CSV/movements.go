@@ -17,8 +17,6 @@ func WriteMovements(lawsuits []Crawler.EntireLawsuit) error {
 		return err
 	}
 
-	defer cf.Close()
-
 	w := csv.NewWriter(cf)
 
 	err = w.WriteAll(rows)

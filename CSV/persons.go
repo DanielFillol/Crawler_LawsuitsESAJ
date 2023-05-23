@@ -17,8 +17,6 @@ func WritePersons(lawsuits []Crawler.EntireLawsuit) error {
 		return err
 	}
 
-	defer cf.Close()
-
 	w := csv.NewWriter(cf)
 
 	err = w.WriteAll(rows)
@@ -31,20 +29,17 @@ func WritePersons(lawsuits []Crawler.EntireLawsuit) error {
 
 func tablePersonsRows(lawsuits []Crawler.EntireLawsuit) [][]string {
 	var prs [][]string
-
 	prs = append(prs, []string{"Processo", "Grau", "Polo", "Nome"})
 
-	for i := 0; i < len(lawsuits); i++ {
-		for j := 0; j < len(lawsuits[i].FirstDegree.Persons); j++ {
-			for k := 0; k < len(lawsuits[i].FirstDegree.Persons[j].Names); k++ {
-				prs = append(prs, []string{lawsuits[i].LawsuitNumber, "primeiro", lawsuits[i].FirstDegree.Persons[j].Pole, lawsuits[i].FirstDegree.Persons[j].Names[k]})
-			}
+	for _, lawsuit := range lawsuits {
+		for _, person1 := range lawsuit.FirstDegree.Persons {
+			prs = append(prs, []string{lawsuit.LawsuitNumber, "primeiro", person1.Pole, person1.Name})
 		}
-		for j := 0; j < len(lawsuits[i].SecondDegree.Persons); j++ {
-			for k := 0; k < len(lawsuits[i].SecondDegree.Persons[j].Names); k++ {
-				prs = append(prs, []string{lawsuits[i].LawsuitNumber, "segundo", lawsuits[i].SecondDegree.Persons[j].Pole, lawsuits[i].SecondDegree.Persons[j].Names[k]})
-			}
+		for _, person2 := range lawsuit.SecondDegree.Persons {
+			prs = append(prs, []string{lawsuit.LawsuitNumber, "segundo", person2.Pole, person2.Name})
 		}
+
 	}
+
 	return prs
 }

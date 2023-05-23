@@ -9,26 +9,35 @@ import (
 )
 
 const (
-	xpathPeople     = "//*[@id=\"tablePartesPrincipais\"]/tbody/tr"
+	xpathPeople1    = "//*[@id=\"tableTodasPartes\"]/tbody/tr"
+	xpathPeople2    = "//*[@id=\"tablePartesPrincipais\"]/tbody/tr"
 	xpathPole       = "td[1]/span"
-	xpathPersonName = "td[2]/span"
 	xpathLawyerName = "td[2]/text()"
 	Dirt            = "\n"
 )
 
 type Person struct {
 	Pole    string
-	Names   []string
+	Name    string
 	Lawyers []string
 }
 
 func GetLawsuitPersons(htmlPgSrc *html.Node) ([]Person, error) {
-	totalPersons := htmlquery.Find(htmlPgSrc, xpathPeople)
+	totalPersons1 := htmlquery.Find(htmlPgSrc, xpathPeople1)
+	totalPersons2 := htmlquery.Find(htmlPgSrc, xpathPeople2)
 
-	if len(totalPersons) > 0 {
+	if len(totalPersons1) > 0 {
 		var personas []Person
-		for _, person := range totalPersons {
-			personas = append(personas, findPerson(person))
+		for i, person := range totalPersons1 {
+			personas = append(personas, findPerson(person, i))
+		}
+		return personas, nil
+	}
+
+	if len(totalPersons2) > 0 {
+		var personas []Person
+		for i, person := range totalPersons2 {
+			personas = append(personas, findPerson(person, i))
 		}
 		return personas, nil
 	}
@@ -37,68 +46,42 @@ func GetLawsuitPersons(htmlPgSrc *html.Node) ([]Person, error) {
 
 }
 
-func findPerson(person *html.Node) Person {
+func findPerson(person *html.Node, i int) Person {
 	pole := htmlquery.InnerText(htmlquery.FindOne(person, xpathPole))
+	name := findName(person, i)
 
-	names := htmlquery.Find(person, xpathPersonName)
-	personNames := findNames(names, person)
+	lawyers := findLawyers(person)
 
-	lawyers := htmlquery.Find(person, xpathLawyerName)
-	lawyerNames := findLawyers(lawyers, person)
-	clearLawyer := clearLawyerName(personNames, lawyerNames)
-
-	return Person{
+	p := Person{
 		Pole:    strings.TrimSpace(pole),
-		Names:   personNames,
-		Lawyers: clearLawyer,
+		Name:    name,
+		Lawyers: lawyers,
 	}
+
+	return p
 
 }
 
-func findNames(names []*html.Node, person *html.Node) []string {
-	var personNames []string
-	if len(names) > 1 {
-		for i := 0; i < len(names); i++ {
-			name := strings.TrimSpace(strings.Replace(htmlquery.InnerText(htmlquery.FindOne(person, "td[2]/text()["+strconv.Itoa(i+1)+"]")), Dirt, "", -1))
-			if name != "" {
-				personNames = append(personNames, name)
-			}
-		}
+func findName(person *html.Node, i int) string {
+	elemNames := htmlquery.Find(person, "//*[@id=\"tableTodasPartes\"]/tbody/tr["+strconv.Itoa(i)+"]/td[2]")
+	if len(elemNames) > 1 {
+		return strings.TrimSpace(strings.Replace(htmlquery.InnerText(htmlquery.FindOne(person, "td[2]/text()["+strconv.Itoa(1)+"]")), Dirt, "", -1))
 	} else {
-		name := strings.TrimSpace(strings.Replace(htmlquery.InnerText(htmlquery.FindOne(person, "td[2]/text()")), Dirt, "", -1))
-		if name != "" {
-			personNames = append(personNames, name)
-		}
+		return strings.TrimSpace(strings.Replace(htmlquery.InnerText(htmlquery.FindOne(person, "td[2]/text()")), Dirt, "", -1))
 	}
-	return personNames
 }
 
-func findLawyers(lawyers []*html.Node, person *html.Node) []string {
+func findLawyers(person *html.Node) []string {
 	var lawyerNames []string
-	if len(lawyers) > 1 {
-		for i := 0; i < len(lawyers); i++ {
+	elemLawyers := htmlquery.Find(person, xpathLawyerName)
+	if len(elemLawyers) > 2 {
+		for i := 1; i < len(elemLawyers); i++ {
 			name := strings.TrimSpace(strings.Replace(htmlquery.InnerText(htmlquery.FindOne(person, "td[2]/text()["+strconv.Itoa(i+1)+"]")), Dirt, "", -1))
 			lawyerNames = append(lawyerNames, name)
 		}
 	} else {
-		name := strings.TrimSpace(strings.Replace(htmlquery.InnerText(htmlquery.FindOne(person, "td[2]/text()")), Dirt, "", -1))
-		lawyerNames = append(lawyerNames, name)
+		lawyerNames = append(lawyerNames, "no lawyer found")
 	}
-	return lawyerNames
-}
 
-func clearLawyerName(names []string, lawyerNames []string) []string {
-	var clearNames []string
-	for _, lawyer := range lawyerNames {
-		if lawyer != "" {
-			for _, name := range names {
-				if name != "" {
-					if lawyer != name {
-						clearNames = append(clearNames, lawyer)
-					}
-				}
-			}
-		}
-	}
-	return clearNames
+	return lawyerNames
 }

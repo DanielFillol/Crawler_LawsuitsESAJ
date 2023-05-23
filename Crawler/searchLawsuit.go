@@ -6,6 +6,7 @@ import (
 	"github.com/tebeka/selenium"
 	"golang.org/x/net/html"
 	"strings"
+	"time"
 )
 
 const (
@@ -73,6 +74,11 @@ func SearchLawsuit(driver selenium.WebDriver, searchLink string, lawsuit string,
 	err = btt.Click()
 	if err != nil {
 		return nil, errors.New("could not click on button")
+	}
+
+	if degree != "p" {
+		//there is a delay of 0.5s on second degree to load the page that does not exist on first degree
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	pageSource, err := driver.PageSource()

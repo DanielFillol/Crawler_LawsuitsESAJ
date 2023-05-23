@@ -1,6 +1,8 @@
 package Crawler
 
-import "github.com/tebeka/selenium"
+import (
+	"github.com/tebeka/selenium"
+)
 
 const (
 	InitWebSite    = "https://esaj.tjsp.jus.br/cpo"
@@ -20,22 +22,22 @@ type Lawsuit struct {
 	Cover     LawsuitCover
 	Persons   []Person
 	Movements []Movement
+	Documents Document
 }
 
-func Craw(driver selenium.WebDriver, lawsuitNumber string, login string, password string) (EntireLawsuit, error) {
-
+func Craw(driver selenium.WebDriver, lawsuitNumber string, lawsuitDocument string, login string, password string) (EntireLawsuit, error) {
 	var e string
 
 	degree := "p"
 	searchLink := InitWebSite + degree + EndWebSite
-	fdLawsuit, err := SingleCraw(driver, searchLink, lawsuitNumber, degree, login, password)
+	fdLawsuit, err := SingleCraw(driver, searchLink, lawsuitNumber, lawsuitDocument, degree, login, password)
 	if err != nil {
 		e += "primeiro " + err.Error()
 	}
 
 	degree = "s"
 	searchLink = InitWebSite + degree + EndWebSite
-	sdLawsuit, err := SingleCraw(driver, searchLink, lawsuitNumber, degree, login, password)
+	sdLawsuit, err := SingleCraw(driver, searchLink, lawsuitNumber, lawsuitDocument, degree, login, password)
 	if err != nil {
 		e += "segundo " + err.Error()
 	}
@@ -48,7 +50,7 @@ func Craw(driver selenium.WebDriver, lawsuitNumber string, login string, passwor
 	}, nil
 }
 
-func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, degree string, login string, password string) (Lawsuit, error) {
+func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, lawsuitDocument string, degree string, login string, password string) (Lawsuit, error) {
 	htmlPgSrc, err := SearchLawsuit(driver, searchLink, lawsuit, degree, login, password)
 	if err != nil {
 		return Lawsuit{
@@ -77,11 +79,23 @@ func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, de
 			return Lawsuit{}, err
 		}
 
+		documents, err := GetLawsuitDocuments(driver, degree, lawsuit, lawsuitDocument)
+		if err != nil {
+			return Lawsuit{
+				Warning:   "no documents found",
+				Cover:     cover,
+				Persons:   persons,
+				Movements: movements,
+				Documents: documents,
+			}, nil
+		}
+
 		return Lawsuit{
 			Warning:   "",
 			Cover:     cover,
 			Persons:   persons,
 			Movements: movements,
+			Documents: documents,
 		}, nil
 	}
 
