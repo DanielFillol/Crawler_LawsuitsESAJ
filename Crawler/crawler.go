@@ -25,7 +25,7 @@ type Lawsuit struct {
 	Documents Document
 }
 
-func Craw(driver selenium.WebDriver, lawsuitNumber string, lawsuitDocument string, login string, password string) (EntireLawsuit, error) {
+func Craw(driver selenium.WebDriver, lawsuitNumber string, lawsuitDocument []string, login string, password string) (EntireLawsuit, error) {
 	var e string
 
 	degree := "p"
@@ -50,7 +50,7 @@ func Craw(driver selenium.WebDriver, lawsuitNumber string, lawsuitDocument strin
 	}, nil
 }
 
-func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, lawsuitDocument string, degree string, login string, password string) (Lawsuit, error) {
+func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, lawsuitDocument []string, degree string, login string, password string) (Lawsuit, error) {
 	htmlPgSrc, err := SearchLawsuit(driver, searchLink, lawsuit, degree, login, password)
 	if err != nil {
 		return Lawsuit{
@@ -105,6 +105,7 @@ func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, la
 		Cover:     LawsuitCover{},
 		Persons:   nil,
 		Movements: nil,
+		Documents: Document{},
 	}, nil
 
 }

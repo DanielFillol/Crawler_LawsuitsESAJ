@@ -48,13 +48,15 @@ func main() {
 		fmt.Println(err)
 	}
 
+	driver.Close()
+
 }
 
 type SearchLawsuits struct {
 	LawsuitNumber  string
-	DocumentNumber string
+	DocumentNumber []string
 }
 
 var lawsuitNumbers = []SearchLawsuits{
-	{LawsuitNumber: "1502024-40.2021.8.26.0567", DocumentNumber: "100.837.979-47"},
+	{LawsuitNumber: "123456", DocumentNumber: []string{"1", "2"}},
 }

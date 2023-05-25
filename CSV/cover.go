@@ -48,7 +48,9 @@ func generateCoverHeaders() []string {
 		"Área",
 		"Valor da Causa",
 		"Possui Autos",
-		"Documento encontrado nos Autos",
+		"Documento Localizado nos autos",
+		"Documento",
+		"Página do PDF com match",
 		"2 Grau - Titulo",
 		"2 Grau - Tag",
 		"2 Grau - Classe",
@@ -61,7 +63,9 @@ func generateCoverHeaders() []string {
 		"2 Grau - Área",
 		"2 Grau - Valor da Causa",
 		"2 Grau - Possui Autos",
-		"2 Grau - Documento encontrado nos Autos",
+		"2 Grau - Documento Localizado nos autos",
+		"2 Grau - Documento",
+		"2 Grau - Página do PDF com match",
 	}
 }
 
@@ -81,7 +85,9 @@ func tableCoverRows(results Crawler.EntireLawsuit) []string {
 		results.FirstDegree.Cover.Field,
 		results.FirstDegree.Cover.Value,
 		strconv.FormatBool(results.FirstDegree.Documents.HasDocuments),
-		strconv.FormatBool(results.FirstDegree.Documents.DocumentFound),
+		strconv.FormatBool(results.FirstDegree.Documents.Found),
+		results.FirstDegree.Documents.DocumentFound,
+		strconv.Itoa(results.FirstDegree.Documents.Page),
 		results.SecondDegree.Cover.Title,
 		results.SecondDegree.Cover.Tag,
 		results.SecondDegree.Cover.Class,
@@ -94,6 +100,8 @@ func tableCoverRows(results Crawler.EntireLawsuit) []string {
 		results.SecondDegree.Cover.Field,
 		results.SecondDegree.Cover.Value,
 		strconv.FormatBool(results.SecondDegree.Documents.HasDocuments),
-		strconv.FormatBool(results.SecondDegree.Documents.DocumentFound),
+		strconv.FormatBool(results.SecondDegree.Documents.Found),
+		results.SecondDegree.Documents.DocumentFound,
+		strconv.Itoa(results.SecondDegree.Documents.Page),
 	}
 }

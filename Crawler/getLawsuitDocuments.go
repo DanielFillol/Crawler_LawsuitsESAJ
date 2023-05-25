@@ -24,14 +24,22 @@ var pdfPath = "/Users/danielfillol/Downloads/"
 
 type Document struct {
 	HasDocuments  bool
-	DocumentFound bool
+	Found         bool
+	DocumentFound string
+	Page          int
 }
 
-func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber string, searchDocument string) (Document, error) {
+type Pdf struct {
+	found         bool
+	documentFound string
+	page          int
+}
+
+func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber string, searchDocument []string) (Document, error) {
 	if degree == "s" {
 		btnViewDocuments, err := driver.FindElement(selenium.ByXPATH, xPathViewDocumentsS)
 		if err != nil {
-			return Document{HasDocuments: false, DocumentFound: false}, errors.New("xPathDocuments not found")
+			return Document{}, errors.New("xPathDocuments not found")
 		}
 		err = btnViewDocuments.Click()
 		if err != nil {
@@ -40,7 +48,7 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 	} else {
 		btnViewDocuments, err := driver.FindElement(selenium.ByXPATH, xPathViewDocumentsP)
 		if err != nil {
-			return Document{HasDocuments: false, DocumentFound: false}, errors.New("xPathDocuments not found")
+			return Document{}, errors.New("xPathDocuments not found")
 		}
 
 		err = btnViewDocuments.Click()
@@ -52,6 +60,11 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 	handles, err := driver.WindowHandles()
 	if err != nil {
 		return Document{}, errors.New("error getting handles")
+	}
+
+	err = driver.CloseWindow(handles[0])
+	if err != nil {
+		return Document{}, errors.New("error closing first")
 	}
 
 	err = driver.SwitchWindow(handles[len(handles)-1])
@@ -97,6 +110,7 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 	}
 
 	start := time.Now()
+	moreThan60s := false
 	var total time.Duration
 	for {
 		element, err := driver.FindElement(selenium.ByXPATH, "//*[@id=\"popupGerarDocumentoFinalizadoComSucesso\"]/table/tbody/tr/td[2]")
@@ -113,6 +127,15 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 			total = time.Since(start)
 			break
 		}
+
+		if time.Since(start) >= 60*time.Second {
+			moreThan60s = true
+			break
+		}
+	}
+
+	if moreThan60s {
+		return Document{HasDocuments: true, Found: false, DocumentFound: "O download foi superior a 1min", Page: 0}, errors.New("more than 20 seconds to download")
 	}
 
 	err = finishElement.Click()
@@ -123,24 +146,9 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 	//wait for the download to finish
 	time.Sleep(total)
 
-	h, err := driver.CurrentWindowHandle()
+	pdf, err := searchDocumentOnFile(pdfPath+lawsuitNumber+".pdf", searchDocument)
 	if err != nil {
-		return Document{}, errors.New("error getting window handle")
-	}
-
-	err = driver.CloseWindow(h)
-	if err != nil {
-		return Document{}, errors.New("error switching windows")
-	}
-
-	err = driver.SwitchWindow(handles[0])
-	if err != nil {
-		return Document{}, errors.New("error switching windows")
-	}
-
-	found, err := searchDocumentOnFile(pdfPath+lawsuitNumber+".pdf", searchDocument)
-	if err != nil {
-		return Document{HasDocuments: true, DocumentFound: false}, err
+		return Document{HasDocuments: true, Found: false, DocumentFound: "", Page: 0}, err
 	}
 
 	err = os.RemoveAll(pdfPath + lawsuitNumber + ".pdf")
@@ -150,48 +158,78 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 
 	return Document{
 		HasDocuments:  true,
-		DocumentFound: found,
+		Found:         pdf.found,
+		DocumentFound: pdf.documentFound,
+		Page:          pdf.page,
 	}, nil
+
 }
 
-func searchDocumentOnFile(pdfPath string, searchString string) (bool, error) {
+func searchDocumentOnFile(pdfPath string, searchString []string) (Pdf, error) {
 	// Enable debug-level logging to see any parsing errors.
 	common.SetLogger(common.ConsoleLogger{})
 
 	// Load the PDF file.
 	pdfReader, _, err := model.NewPdfReaderFromFile(pdfPath, nil)
 	if err != nil {
-		return false, fmt.Errorf("failed to open PDF file: %v", err)
+		return Pdf{found: false, documentFound: "", page: 0}, fmt.Errorf("failed to open PDF file: %v", err)
 	}
 
 	// Get the number of pages in the PDF.
 	numPages, err := pdfReader.GetNumPages()
 	if err != nil {
-		return false, fmt.Errorf("failed to get number of pages: %v", err)
+		return Pdf{found: false, documentFound: "", page: 0}, fmt.Errorf("failed to get number of pages: %v", err)
 	}
 
 	// Iterate through each page and search for the string.
 	found := false
+	pg := 0
+	dcf := ""
 	for i := 1; i <= numPages; i++ {
 		page, err := pdfReader.GetPage(i)
 		if err != nil {
-			return false, fmt.Errorf("failed to get page %d: %v", i, err)
+			return Pdf{found: false, page: pg}, fmt.Errorf("failed to get page %d: %v", i, err)
 		}
 
 		content, err := page.GetContentStreams()
 		if err != nil {
-			return false, fmt.Errorf("failed to get content streams for page %d: %v", i, err)
+			return Pdf{found: false, page: pg}, fmt.Errorf("failed to get content streams for page %d: %v", i, err)
 		}
 
 		// Convert the content streams to a string.
 		contentStr := strings.Join(content, " ")
 
-		// Search for the string in the content.
-		if strings.Contains(contentStr, searchString) {
-			found = true
-			break
+		for _, s := range searchString {
+			// Search for the string in the content.
+			if strings.Contains(contentStr, s) {
+				found = true
+				pg = i
+				dcf += "{" + s + "}"
+			}
+
+			// Search for the string in the content.
+			if strings.Contains(contentStr, strings.Replace(strings.Replace(s, ".", "", -1), "-", "", -1)) {
+				found = true
+				pg = i
+				dcf += "{" + strings.Replace(strings.Replace(s, ".", "", -1), "-", "", -1) + "}"
+			}
+
+			// Search for the string in the content.
+			if strings.Contains(contentStr, s) {
+				found = true
+				pg = i
+				dcf += "{" + s + "}"
+			}
+
+			if found {
+				break
+			}
 		}
 	}
 
-	return found, nil
+	return Pdf{
+		found:         found,
+		documentFound: dcf,
+		page:          pg,
+	}, nil
 }
