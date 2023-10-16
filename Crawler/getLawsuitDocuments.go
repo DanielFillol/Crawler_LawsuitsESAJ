@@ -6,7 +6,6 @@ import (
 	"github.com/tebeka/selenium"
 	"github.com/unidoc/unipdf/v3/common"
 	"github.com/unidoc/unipdf/v3/model"
-	"os"
 	"strings"
 	"time"
 )
@@ -57,6 +56,8 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 		}
 	}
 
+	time.Sleep(2 * time.Second)
+
 	handles, err := driver.WindowHandles()
 	if err != nil {
 		return Document{}, errors.New("error getting handles")
@@ -97,7 +98,7 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 		return Document{}, errors.New("xPathContinue not found")
 	}
 	//wait for JS to load
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(2 * time.Second)
 
 	err = btnContinue.Click()
 	if err != nil {
@@ -144,17 +145,17 @@ func GetLawsuitDocuments(driver selenium.WebDriver, degree string, lawsuitNumber
 	}
 
 	//wait for the download to finish
-	time.Sleep(total)
+	time.Sleep(total + 5)
 
 	pdf, err := searchDocumentOnFile(pdfPath+lawsuitNumber+".pdf", searchDocument)
 	if err != nil {
 		return Document{HasDocuments: true, Found: false, DocumentFound: "", Page: 0}, err
 	}
 
-	err = os.RemoveAll(pdfPath + lawsuitNumber + ".pdf")
-	if err != nil {
-		return Document{}, err
-	}
+	//err = os.RemoveAll(pdfPath + lawsuitNumber + ".pdf")
+	//if err != nil {
+	//	return Document{}, err
+	//}
 
 	return Document{
 		HasDocuments:  true,
