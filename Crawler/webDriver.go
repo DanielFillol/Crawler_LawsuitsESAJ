@@ -6,7 +6,7 @@ import (
 )
 
 func SeleniumWebDriver() (selenium.WebDriver, error) {
-	caps := selenium.Capabilities(map[string]interface{}{"browserName": "chrome", "Args": "--headless"})
+	caps := selenium.Capabilities(map[string]interface{}{"browserName": "firefox", "Args": "--headless"})
 
 	driver, err := selenium.NewRemote(caps, "")
 	if err != nil {
