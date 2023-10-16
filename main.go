@@ -1,5 +1,8 @@
 package main
 
+//TODO: covers has another unmapped field "Outros números" this field can result in the search engine finding a different lawsuit number that was searched. Example: Search: 0000009-81.2015.8.26.0536 it returns: 0022797-06.2018.8.26.0562
+//TODO: given this unmapped occurrence the getLawsuitDocuments is compromised as it searches for a file based on lawsuit searched, example: search for: 0000009-81.2015.8.26.0536.pdf but it does not exist, only: 0022797-06.2018.8.26.0562.pdf
+
 import (
 	"fmt"
 	"github.com/Darklabel91/Crawler_LawsuitsESAJ/CSV"
