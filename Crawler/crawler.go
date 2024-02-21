@@ -23,6 +23,7 @@ type Lawsuit struct {
 	Persons   []Person
 	Movements []Movement
 	Documents Document
+	Pole      Poles
 }
 
 func Craw(driver selenium.WebDriver, lawsuitNumber string, lawsuitDocument []string, login string, password string) (EntireLawsuit, error) {
@@ -79,14 +80,24 @@ func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, la
 			return Lawsuit{}, err
 		}
 
-		documents, err := GetLawsuitDocuments(driver, degree, lawsuit, lawsuitDocument)
+		//documents, err := GetLawsuitDocuments(driver, degree, lawsuit, lawsuitDocument)
+		//if err != nil {
+		//	return Lawsuit{
+		//		Warning:   "no documents found",
+		//		Cover:     cover,
+		//		Persons:   persons,
+		//		Movements: movements,
+		//		Documents: documents,
+		//	}, nil
+		//}
+
+		poles, err := getLawsuitPoles(driver)
 		if err != nil {
 			return Lawsuit{
 				Warning:   "no documents found",
 				Cover:     cover,
 				Persons:   persons,
 				Movements: movements,
-				Documents: documents,
 			}, nil
 		}
 
@@ -95,7 +106,8 @@ func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, la
 			Cover:     cover,
 			Persons:   persons,
 			Movements: movements,
-			Documents: documents,
+			//Documents: documents,
+			Pole: poles,
 		}, nil
 	}
 
@@ -106,6 +118,7 @@ func SingleCraw(driver selenium.WebDriver, searchLink string, lawsuit string, la
 		Persons:   nil,
 		Movements: nil,
 		Documents: Document{},
+		Pole:      Poles{},
 	}, nil
 
 }

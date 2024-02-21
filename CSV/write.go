@@ -29,6 +29,11 @@ func WriteCSV(lawsuits []Crawler.EntireLawsuit) error {
 		return err
 	}
 
+	err = WritePoles(lawsuits)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
